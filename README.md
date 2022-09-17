@@ -24,9 +24,7 @@ The following tools are needed to be able to run the solution.
 
 [2. Create a new ABP Framework application](#create-a-new-abp-framework-application)
 
-
-
-[Part 3: Create an SQL Database on Azure and change connection string in appsettings.json files](https://abpioazuredevopsblazor.azurewebsites.net/part3)
+[3. Create an SQL Database in Azure](#create-an-sql-database-in-azure)
 
 [Part 4: Set up the Build pipeline in AzureDevops and publish the Build Artifacts](https://abpioazuredevopsblazor.azurewebsites.net/part4)
 
@@ -94,7 +92,7 @@ Open a command prompt in the [YourAppName].Blazor folder and enter the command b
     dotnet run
 ```
 
-Stop both the API and the Blazor project by pressing CTRL+C.
+Stop both the API and the Blazor project by pressing **CTRL+C**.
 
 #### Commit and push everything to GitHub
 
@@ -104,4 +102,64 @@ Open a command prompt in the root folder of your ABP Framework project and add, 
 git add .
 git commit -m your_commit_message_here
 git push
+```
+
+### Create an SQL Database in Azure
+
+* Login into [Azure Portal](https://portal.azure.com/)
+
+* Click **Create a resource**
+
+* Search for *SQL Database*
+
+* Click the **Create** button in the *SQL Database window*
+
+* Create a new resource group. Name it *rg[YourAppName]*
+
+* Enter *[YourAppName]Db* as database name
+
+* Create a new Server and name it *[YourAppName]server*
+
+* Authentication method: Use Sql authentication
+
+* Enter a [serveradmin] login and passwords. Click the **OK** button
+
+* Click **Configure database**. Go to the *Basic* version and click the **Apply** button
+
+* Click the **Review + create** button. Click **Create**
+
+* Go to Azure Resources and navigate to the **SQL server** when the SQL Database is created
+
+* Click **Networking** under Security left side menu.
+
+* In the Public Access tab, select **Selected networks** and click **Add your client IPv4 address** at the Firewall rules. Save.
+
+* In the **Exceptions** section, select **Allow Azure and resources to access this server** and save
+
+* Go to your **SQL database**, click **Connection strings** and copy the connection string
+
+* Replace the Default connection string in the appsettings.json files of the [YourAppName].HttpApi.Host and the [YourAppName].DbMigrator project
+
+* Do not forget to replace {your_password} with the correct server password you entered in Azure SQL Database
+
+Open the command prompt in the [YourAppName].DbMigrator project again and enter the command below to apply the database migrations
+
+```bash
+    dotnet run
+```
+
+Open the command prompt in the [YourAppName].HttpApi.Host project and enter the command below to check your API is working
+
+```bash
+    dotnet run
+```
+
+Stop the [YourAppName].HttpApi.Host by entering CTRL+C
+
+Open the command prompt in the root folder of your project and add, commit and push all your changes to your GitHub repository
+
+```bash
+    git add .
+    git commit -m database_created
+    git push
 ```
