@@ -19,11 +19,11 @@ The following tools are needed to be able to run the solution.
 * ABP CLI version 6.0.0
 
 
-[Part 1: Create a new GitHub repository](#Create a new GitHub repository)
+[Part 1: Create a new GitHub repository](#create-a-new-github-repository)
 
 [Part 2: Create a new ABP Framework application](https://abpioazuredevopsblazor.azurewebsites.net/part2)
 
-### Create a new GitHub repository
+
 
 [Part 3: Create an SQL Database on Azure and change connection string in appsettings.json files](https://abpioazuredevopsblazor.azurewebsites.net/part3)
 
@@ -40,3 +40,6 @@ The following tools are needed to be able to run the solution.
 [Part 9: Add an extra Stage in the Release pipeline in the AzureDevops to deploy [YourAppName].Blazor project](https://abpioazuredevopsblazor.azurewebsites.net/part9)
 
 [Part 10: Release pipeline finished, Deployment [YourAppName].Blazor project succeeded, but Web App still not working. How to fix the issues?](https://abpioazuredevopsblazor.azurewebsites.net/part10)
+
+
+### Create a new GitHub repository
