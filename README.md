@@ -19,7 +19,7 @@ The following tools are needed to be able to run the solution.
 * ABP CLI version 6.0.0
 
 
-[Part 1: Create a new GitHub repository](#Create a GitHub repository)
+[Part 1: Create a new GitHub repository](#Create a new GitHub repository)
 
 [Part 2: Create a new ABP Framework application](https://abpioazuredevopsblazor.azurewebsites.net/part2)
 
