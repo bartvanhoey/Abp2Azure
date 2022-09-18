@@ -28,7 +28,7 @@ The following tools are needed to be able to run the solution.
 
 [4. Set up the Build pipeline in AzureDevops](#set-up-the-build-pipeline-in-azuredevops)
 
-[Part 5: Create a Web App in the Azure Portal to deploy [YourAppName].HttpApi.Host project](https://abpioazuredevopsblazor.azurewebsites.net/part5)
+[5. Create a Web App in the Azure Portal](#create-a-web-app-in-the-azure-portal)
 
 [Part 6: Create a Release pipeline in the AzureDevops and deploy [YourAppName].HttpApi.Host project](https://abpioazuredevopsblazor.azurewebsites.net/part6)
 
@@ -169,7 +169,7 @@ Stop the [YourAppName].HttpApi.Host by entering **CTRL+C**
 * Open the [AzureDevops](https://azure.microsoft.com/en-us/services/devops/) page and click on the **Sign in to Azure Devops link**
 * Click on **New organization** and follow the steps to create a new organization. Name it [YourAppName]org
 * Enter [YourAppName]Proj as project name in the **Create a project to get started** window
-* Select **Private visibility** and click the **Create project** button
+* Select **Public visibility** and click the **Create project** button
 * Click on the **Pipelines** button to continue
 * Click on the **Create Pipeline** button
 * Select **GitHub** in the **Where is your code window?**
@@ -187,7 +187,7 @@ Stop the [YourAppName].HttpApi.Host by entering **CTRL+C**
 ![Review your pipeline YAML?](/images/review_your_pipeline_yaml.png)
 
 * Click **Save and run** in (commit directly to the main branch checked) the **Save and run** window
-* The pipeline should start running now
+* The pipeline should start running.
 
 **ATTENTION:**
 
@@ -198,9 +198,73 @@ Probably the BUILD will fails with this error message. You can read more about [
     No hosted parallelism has been purchased or granted. To request a free parallelism grant, please fill out the following form https://aka.ms/azpipelines-parallelism-request
 ```
 
+* Comment out the VSTest@2 task as this tasks throws an error
+* Add the 3 tasks (Run unit tests, Dotnet publish, Publish artifact) below in **azure-pipelines.yml** file.
 
+```bash
+trigger:
+- main
 
+pool:
+  vmImage: 'windows-latest'
 
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
 
+steps:
+- task: NuGetToolInstaller@1
+  displayName: Install Nuget tool
+
+- task: NuGetCommand@2
+  displayName: Restore Nuget packages
+  inputs:
+    restoreSolution: '$(solution)'
+
+- task: VSBuild@1
+  displayName: Build project
+  inputs:
+    solution: '$(solution)'
+    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+ 
+# The task belows throws an error: Testhost process exited with error: 
+# Cannot use file stream for [...\bin\Debug\net6.0\testhost.deps.json]: No such file or directory
+# - task: VSTest@2
+#   inputs:
+#     platform: '$(buildPlatform)'
+#     configuration: '$(buildConfiguration)'
+#     batchingBasedOnAgentsOption
+
+- task: DotNetCoreCLI@2
+  displayName: Run unit tests
+  inputs:
+    command: test
+    projects: '**/*[Tt]ests/*.csproj'
+    arguments: '--configuration $(BuildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: Dotnet publish
+  inputs:
+    command: publish
+    publishWebProjects: True
+    arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
+    zipAfterPublish: True
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish artifact
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)'
+  condition: succeededOrFailed()
+```
+
+* Click **Save**, **Save** and **Run** to start the build pipeline.
+* After a successful build, you can see in the **Summary** window **1 published** to the **drop** folder
+
+![Summary after a successful build](/images/summary_after_a_successful_build.png)
+
+### Create a Web App in the Azure Portal
 
 
