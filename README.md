@@ -32,7 +32,7 @@ The following tools are needed to be able to run the solution.
 
 [6. Create Release pipeline and deploy HttpApi.Host project](#create-release-pipeline-and-deploy-httpapihost-project)
 
-[Part 7: Release pipeline finished, Deployment [YourAppName].HttpApi.Host project succeeded, but Web App still not working. How to fix the issues?](https://abpioazuredevopsblazor.azurewebsites.net/part7)
+[7. Deployment succeeded, but Web App not working. Fix the issues](#deployment-succeeded-but-web-app-not-working-fix-the-issues)
 
 [Part 8: Create a Web App in the Azure Portal to deploy [YourAppName].Blazor project](https://abpioazuredevopsblazor.azurewebsites.net/part8)
 
@@ -314,6 +314,125 @@ steps:
 
 ![HTTP Error 500.30 - ASP.NET Core app failed to start](images/http_error_500_30_aspnet_core_failed_to_start.png)
 
+### Deployment succeeded, but Web App not working. Fix the issues
+
+* Open the **Debug Console** in the **Kudu** window by navigating to **[YourAppName]api.scm.azurewebsites.net**
+* Run the **dir** command to check if [YourAppName].HttpApi.Host files have been deployed in the **home\site\wwwroot** folder
+
+```bash
+    dir
+```
+
+* Check the dotnet version of the Azure Web App. Should be 6.0.x
+
+```bash
+   dotnet --version
+```
+
+![Kudu debug console](images/kudu_debug_console.png)
+
+* To solve error **HTTP Error 500.30 - - ASP.NET Core app failed to start** add **&lt;AspNetCoreHostingModel&gt;OutOfProcess&lt;/AspNetCoreHostingModel&gt;** to the [YourAppName].HttpApi.Host.csproj file right below the **TargetFramework** tag
+
+* Open a command prompt in the root folder of your project. Add, Commit and Push all your changes to your GitHub repo
+
+```bash
+    git add .
+    git commit -m OutOfProcess
+    git push
+```
+
+* Pushing changes to your GitHub repo repository triggers a **new Build** as **Continuous Integration** is enabled in the Build pipeline
+
+* The release succeeded but I got **Http Error 502.5 - ANCM Out-Of-Process Startup Failure**
+
+![Http Error 502.5 - ANCM Out-Of-Process Startup Failure](images/ancm_out_of_process_startup_failure.png)
+
+* Open the **Debug Console** in the **Kudu** in **[YourAppName]api.scm.azurewebsites.net**
+* Start [YourAppName].HttpApi.Host.exe in the **Debug Console** to find the error reason
+  
+  ```bash
+    C:\home\site\wwwroot>[YourAppName].HttpApi.Host.exe
+  ```bash
+
+**ERROR: Internal.Cryptography.CryptoThrowHelper+WindowsCryptographicException: Access is denied.**
+
+```bash
+
+Host terminated unexpectedly!
+Volo.Abp.AbpInitializationException: An error occurred during ConfigureServicesAsync phase of the module Volo.Abp.OpenIddict.AbpOpenIddictAspNetCoreModule, Volo.Abp.OpenIddict.AspNetCore, Version=6.0.0.0, Culture=neutral, PublicKeyToken=null. See the inner exception for details.
+ ---> Internal.Cryptography.CryptoThrowHelper+WindowsCryptographicException: Access is denied.
+```
+
+On the [ABP Support](https://support.abp.io/QA/Questions/3664/Azure-5003-error-Access-Denied) they propose the following solution
+
+```bash
+```
 
 
-The Deployment succeeded, but the Web App is still having issues. We will fix them in the next part
+
+
+
+      1. When this new Build has finished, a new Release will start. Wait until the Release has finished and the Deployment Succeeded
+      2.  Navigate to the URL of the Web App. You probably see the error **An error occurred while starting the application.**
+      <Figure Size="FigureSize.None">
+        <FigureImage Source="images/an_error_when_starting_the_application.jpg" />
+      </Figure>
+      1.  Open the **Debug Console** in the **Kudu** window by navigating to [YourAppNameapi].scm.azurewebsites.net
+      ```bashhttps://[YourAppName]api.scm.azurewebsites.net</code></pre>
+      1.  Try to invoke an **error description** by entering the command below in the **home/site/wwwroot** folder of the **Debug Console**
+      ```bashdotnet [YourAppName].HttpApi.Host.dll</code></pre>
+      1.  If you receive no Error description. Go to **Program.cs** in the **[YourAppName].HttpApi.Host** project and comment out the **if debug statements**
+      <Figure Size="FigureSize.None">
+        <FigureImage Source="images/comment_out_if_debug_statements_in_ProgramCs.jpg" />
+      </Figure>
+      1.  Add, Commit and Push all your changes to your GitHub repository
+       ```bash
+git add .
+git commit -m CommentOutDebugStatements
+git push
+      </code></pre>
+      15. Wait until the new Build and new Release have finished and the Deployment has succeeded
+      16. Navigate to the URL of the Web App. You should see the same error **An error occurred while starting the application.** again
+       17. Open the **Debug Console** in the **Kudu** window by navigating to [YourAppNameapi].scm.azurewebsites.net
+      ```bashhttps://[YourAppName]api.scm.azurewebsites.net</code></pre>
+      18. Enter the command below in the wwwroot folder of the **Debug Console** to start the application. Now you should see the detailed error description. The file **tempkey.rsa** is missing
+      ```bashdotnet [YourAppName].HttpApi.Host.dll</code></pre>
+      <Figure Size="FigureSize.None">
+        <FigureImage Source="images/could_not_find_file_tempkey.rsa.jpg" />
+      </Figure>
+      19. Add the section below to the **[YourAppName].HttpApi.Host.csproj** file to copy the **missing tempkey.rsa** file to the output directory 
+      ```bash
+&lt;ItemGroup&gt
+  &lt;None Update="tempkey.rsa"&gt
+    &lt;CopyToOutputDirectory&gtPreserveNewest&lt;/CopyToOutputDirectory&gt
+  &lt;/None&gt
+&lt;/ItemGroup&gt
+      </code></pre>
+      20. Add, Commit and Push all your changes to your GitHub repository
+      ```bash
+git add .
+git commit -m CopyToOutputDirectory
+git push
+      </code></pre>
+      21. Wait until the new Build and Release have finished and the Deployment has succeeded
+      22. Navigate to the URL of the Web App to see if the error is gone
+      23. It's possible that you get another error: **This page isn’t working**
+      24. Open the **Debug Console** in the **Kudu** window by navigating to **[YourAppNameapi].scm.azurewebsites.net**
+      ```bashhttps://[YourAppName]api.scm.azurewebsites.net</code></pre>
+      25. Enter the command below in the **wwwroot** folder of the **Debug Console** to get a more specific error description
+      ```bashdotnet [YourAppName].HttpApi.Host.dll</code></pre>
+      26. Probably you receive the error description below
+      <Figure Size="FigureSize.None">
+        <FigureImage Source="images/client_not_allowed_to_access_server.jpg" />
+      </Figure>
+      27. Go to your **Azure Portal** and select your **[YourAppName]server**
+      28. Click on <b>Firewalls and virtual networks</b> in the left menu
+      29. Select <b>Yes</b> in the **Allow Azure services and resources to access this server** toggle
+      30. Click the <b>Save</b> button. Click <b>OK</b> in the **Successfully updated server firewall rules** window. Close the window 
+      31. Navigate to the URL of the Web App and Refresh the page
+      32. Your **[YourAppName].HttpApi.Host** project should now <b>be up and running</b> and the **Swagger** page is served by your Web App in Azure
+      <Figure Size="FigureSize.None">
+        <FigureImage Source="images/swagger_page_served_by_web_app_on_azure.jpg" />
+      </Figure>
+    </Part>
+

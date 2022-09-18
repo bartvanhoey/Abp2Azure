@@ -28,6 +28,9 @@ using Volo.Abp.Modularity;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
+using Volo.Abp.OpenIddict;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Abp2Azure;
 
@@ -55,6 +58,36 @@ public class Abp2AzureHttpApiHostModule : AbpModule
                 options.UseAspNetCore();
             });
         });
+
+        var hostingEnvironment = context.Services.GetHostingEnvironment();
+
+        if (!hostingEnvironment.IsDevelopment())
+        {
+            PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
+            {
+                options.AddDevelopmentEncryptionAndSigningCertificate = false;
+            });
+
+            PreConfigure<OpenIddictServerBuilder>(builder =>
+            {
+                // In production, it is recommended to use two RSA certificates, one for encryption, one for signing.
+                builder.AddEncryptionCertificate(GetSigningCertificate(hostingEnvironment, context.Services.GetConfiguration()));
+                builder.AddSigningCertificate(GetSigningCertificate(hostingEnvironment, context.Services.GetConfiguration()));
+            });
+        }
+    }
+    private X509Certificate2 GetSigningCertificate(IWebHostEnvironment hostingEnv, IConfiguration configuration)
+    {
+        var fileName = configuration["MyAppCertificate:X590:FileName"]; //*.pfx 
+        var passPhrase = configuration["MyAppCertificate:X590:PassPhrase"]; // pass phrase (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)
+        var file = Path.Combine(hostingEnv.ContentRootPath, fileName);
+
+        if (!File.Exists(file))
+        {
+            throw new FileNotFoundException($"Signing Certificate couldn't found: {file}");
+        }
+
+        return new X509Certificate2(file, passPhrase);
     }
 
     public override void ConfigureServices(ServiceConfigurationContext context)
@@ -184,19 +217,19 @@ public class Abp2AzureHttpApiHostModule : AbpModule
         {
             options.AddDefaultPolicy(builder =>
                {
-                builder
-                    .WithOrigins(
-                        configuration["App:CorsOrigins"]
-                            .Split(",", StringSplitOptions.RemoveEmptyEntries)
-                            .Select(o => o.RemovePostFix("/"))
-                            .ToArray()
-                    )
-                    .WithAbpExposedHeaders()
-                    .SetIsOriginAllowedToAllowWildcardSubdomains()
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
-            });
+                   builder
+                       .WithOrigins(
+                           configuration["App:CorsOrigins"]
+                               .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                               .Select(o => o.RemovePostFix("/"))
+                               .ToArray()
+                       )
+                       .WithAbpExposedHeaders()
+                       .SetIsOriginAllowedToAllowWildcardSubdomains()
+                       .AllowAnyHeader()
+                       .AllowAnyMethod()
+                       .AllowCredentials();
+               });
         });
     }
 
