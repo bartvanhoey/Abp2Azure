@@ -448,6 +448,17 @@ Console.WriteLine("encryption-certificate.pfx file generated!");
 
 * Copy/paste the **encryption-certificate.pfx** file into the root of the [YourAppName].HttpApi.Host project
 
+* In the [YourAppName].HttpApi.Host.csproj file add section below:
+
+  ```bash
+  <ItemGroup>
+    <None Remove="encryption-certificate.pfx" />
+    <Content Include="encryption-certificate.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  ```
+
 
 
 
