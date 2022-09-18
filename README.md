@@ -405,7 +405,7 @@ private X509Certificate2 GetSigningCertificate(IWebHostEnvironment hostingEnv, I
 
 ```
 
-* In the appsettings.json file of the [YourAppName]HttpApi.Host project add section below
+* In the appsettings.json file of the [YourAppName].HttpApi.Host project add section below
 
 ```bash
 "MyAppCertificate": { 
@@ -444,8 +444,9 @@ Console.WriteLine("encryption-certificate.pfx file generated!");
 
 ```
 
-* Run the console app to generate the  encryption-certificate.pfx file
+* Run the console app to generate the **encryption-certificate.pfx** file
 
+* Copy/paste the **encryption-certificate.pfx** file into the root of the [YourAppName].HttpApi.Host project
 
 
 
