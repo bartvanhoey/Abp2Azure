@@ -31,6 +31,7 @@ using Volo.Abp.VirtualFileSystem;
 using Volo.Abp.OpenIddict;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Hosting;
+using System.Diagnostics;
 
 namespace Abp2Azure;
 
@@ -86,6 +87,8 @@ public class Abp2AzureHttpApiHostModule : AbpModule
         {
             throw new FileNotFoundException($"Signing Certificate couldn't found: {file}");
         }
+
+        Debug.WriteLine($"{file} - {passPhrase}");
 
         return new X509Certificate2(file, passPhrase);
     }

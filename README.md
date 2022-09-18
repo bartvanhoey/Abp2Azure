@@ -459,6 +459,16 @@ Console.WriteLine("encryption-certificate.pfx file generated!");
   </ItemGroup>
   ```
 
+* Remove the line *.pfx in the.gitignore file
+
+* Open a command prompt in the root folder of your project. Add, Commit and Push all your changes to your GitHub repo
+
+```bash
+    git add .
+    git commit -m EncryptionCertificate
+    git push
+```
+
 
 
 
