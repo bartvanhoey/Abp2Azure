@@ -30,7 +30,7 @@ The following tools are needed to be able to run the solution.
 
 [5. Create a Web App in the Azure Portal](#create-a-web-app-in-the-azure-portal)
 
-[Part 6: Create a Release pipeline in the AzureDevops and deploy [YourAppName].HttpApi.Host project](https://abpioazuredevopsblazor.azurewebsites.net/part6)
+[6. Create Release pipeline and deploy HttpApi.Host project](#create-release-pipeline-and-deploy-httpapihost-project)
 
 [Part 7: Release pipeline finished, Deployment [YourAppName].HttpApi.Host project succeeded, but Web App still not working. How to fix the issues?](https://abpioazuredevopsblazor.azurewebsites.net/part7)
 
@@ -267,4 +267,53 @@ steps:
 
 ### Create a Web App in the Azure Portal
 
+* Login in to the [Azure Portal](https://portal.azure.com/)
+* Click on **Create a resource**
+* Search for **Web App** in the **Search services and marketplace** field
+* Click the **Create** link in the **Web App** icon
+* Select rg[YourAppName] in the **Resource Group** dropdown
+* Enter [YourAppName]API in the **Name** input field
+* Select **.NET 6 (LTS)** in the **Runtime stack** dropdown
+* Select **Windows** as **Operating System**
+* Select the same **Region** as in the **SQL server** you created in **Part 3**
+* Click on **Create new** in the **Windows Plan**. Name it [YourAppName]WinPlan
+* Click **Change size** in **Sku and size**. Go for the **Dev/Test Free F1 version** and click the **Apply** button
+* Click the **Review + create** button. Click **Create** button
+* Click on **Go to resource** when the **Web App** has been created
+* Click on **Configuration** in the left menu and click **+ New application setting** in the **Application settings** tab
+* Enter **ASPNETCORE_ENVIRONMENT** in the Name field and **Staging** in the Value field. Click the **OK**, **Save and Continue** buttons
+* Copy the **URL** in the **Overview** menu of the **Web App** (https://[YourAppName]api.azurewebsites.net)
 
+### Create Release pipeline and deploy HttpApi.Host project
+
+* Open the [AzureDevops](https://azure.microsoft.com/en-us/services/devops/) page and click on the **Sign in to Azure Devops link**
+* Click on [YourAppName]Proj and click on **Releases** in the **Pipelines** menu
+* Click on the **New pipeline** button in the **No release pipelines found** window
+* Select **Azure App Service deployment** and click the **Apply** button
+* Enter **[YourAppName]staging** in the **Stage name** field in the **Stage** window. Close window
+* Click **+ Add an artifact** in the **Pipeline** tab
+* Select the **Build** icon as **Source type** in the **Add an artifact** window
+* Select Build pipeline in the **Source (build pipeline)** dropdown and click the **Add** button
+* Click on the **Continuous deployment trigger (thunderbolt icon)**
+* Set the toggle to **Enabled** in the the **Continuous deployment trigger** window
+* Click **+ Add** in **No filters added**. Select **Include** in the **Type** dropdown. Select your branch in the **Build** branch dropdown and close the window
+* Click on **the little red circle with the exclamation mark** in the **Tasks** tab menu
+* Select your subscription in the **Azure subscription** dropdown
+* Click **Authorize** and enter your credentials in the next screens
+* After Authorization, select the **[YourAppName]API** in the **App service name** dropdown
+* Click on the **Deploy Azure App Service** task
+* Select **[YourAppName].HttpApi.Host.zip** in the **Package or folder** input field
+
+  ![Deploy Azure App Service](images/deploy_azure_app_service.png)
+
+* Click on the **Save** icon in the top menu and click **OK**
+* Click **Create release** in the top menu. Click **Create** to create a release
+* Click on the **Pipeline** tab and wait until the Deployment succeeds
+* Navigate to the **URL** (https://[YourAppName]api.azurewebsites.net) of your Web App
+* You probably see error **HTTP Error 500.30 - ASP.NET Core app failed to start**
+
+![HTTP Error 500.30 - ASP.NET Core app failed to start](images/http_error_500_30_aspnet_core_failed_to_start.png)
+
+
+
+The Deployment succeeded, but the Web App is still having issues. We will fix them in the next part
