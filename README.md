@@ -26,7 +26,7 @@ The following tools are needed to be able to run the solution.
 
 [3. Create an SQL Database in Azure](#create-an-sql-database-in-azure)
 
-[Part 4: Set up the Build pipeline in AzureDevops and publish the Build Artifacts](https://abpioazuredevopsblazor.azurewebsites.net/part4)
+[4. Set up the Build pipeline in AzureDevops](#set-up-the-build-pipeline-in-azuredevops)
 
 [Part 5: Create a Web App in the Azure Portal to deploy [YourAppName].HttpApi.Host project](https://abpioazuredevopsblazor.azurewebsites.net/part5)
 
@@ -142,24 +142,65 @@ git push
 
 * Do not forget to replace {your_password} with the correct server password you entered in Azure SQL Database
 
-Open the command prompt in the [YourAppName].DbMigrator project again and enter the command below to apply the database migrations
+* Open a terminal in the [YourAppName].DbMigrator project and run the command below to apply the db migrations
 
 ```bash
     dotnet run
 ```
 
-Open the command prompt in the [YourAppName].HttpApi.Host project and enter the command below to check your API is working
+* Open a command prompt in the [YourAppName].HttpApi.Host project and start your API.
 
 ```bash
     dotnet run
 ```
 
-Stop the [YourAppName].HttpApi.Host by entering CTRL+C
+Stop the [YourAppName].HttpApi.Host by entering **CTRL+C**
 
-Open the command prompt in the root folder of your project and add, commit and push all your changes to your GitHub repository
+* Open a terminal in the root folder of your project. Add, commit and push all your changes to your GitHub repo
 
 ```bash
     git add .
     git commit -m database_created
     git push
 ```
+
+### Set up the Build pipeline in AzureDevops
+
+* Open the [AzureDevops](https://azure.microsoft.com/en-us/services/devops/) page and click on the **Sign in to Azure Devops link**
+* Click on **New organization** and follow the steps to create a new organization. Name it [YourAppName]org
+* Enter [YourAppName]Proj as project name in the **Create a project to get started** window
+* Select **Private visibility** and click the **Create project** button
+* Click on the **Pipelines** button to continue
+* Click on the **Create Pipeline** button
+* Select **GitHub** in the **Where is your code window?**
+
+![Where is your code window?](/images/where_is_your_code.png)
+
+* Select your GitHub [YourAppName]repo.
+* Click on **Approve and install** in the **Repository access** section in the Azure Pipelines window
+  
+  ![Repository access?](/images/repository_access_section_in_azure_pipelines_window.png)
+
+* You get redirected to the **Configure your pipeline** window. Select **ASP.NET Core (.NET Framework)**
+* You get redirected to the **Review your pipeline YAML** window. Click **Save and run**
+
+![Review your pipeline YAML?](/images/review_your_pipeline_yaml.png)
+
+* Click **Save and run** in (commit directly to the main branch checked) the **Save and run** window
+* The pipeline should start running now
+
+**ATTENTION:**
+
+Probably the BUILD will fails with this error message. You can read more about [No hosted parallelism has been purchased or granted](https://stackoverflow.com/questions/68405027/how-to-resolve-no-hosted-parallelism-has-been-purchased-or-granted-in-free-tie) on StackOverflow
+
+```bash
+    1 error(s), 0 warning(s)
+    No hosted parallelism has been purchased or granted. To request a free parallelism grant, please fill out the following form https://aka.ms/azpipelines-parallelism-request
+```
+
+
+
+
+
+
+
