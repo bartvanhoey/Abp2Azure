@@ -22,6 +22,7 @@ steps:
     restoreSolution: '$(solution)'
 
 - task: VSBuild@1
+  displayName: Build project
   inputs:
     solution: '$(solution)'
     msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
@@ -29,23 +30,15 @@ steps:
     configuration: '$(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
-  displayName: Test
+  displayName: Run unit tests
   inputs:
     command: test
     projects: '**/*[Tt]ests/*.csproj'
     arguments: '--configuration $(BuildConfiguration)'
 
-# - task: VSTest@2
-#   inputs:
-#     testSelector: 'testAssemblies'
-#     testAssemblyVer2: |
-#       **\*test*.dll
-#       !**\*TestAdapter.dll
-#       !**\obj\**
-#     searchFolder: '$(System.DefaultWorkingDirectory)'
-#     vsTestVersion: 'latest'
-#     publishRunAttachments: false
-
+ 
+# The task belows throws an error: Testhost process exited with error: 
+# Cannot use file stream for [...\bin\Debug\net6.0\testhost.deps.json]: No such file or directory
 # - task: VSTest@2
 #   inputs:
 #     platform: '$(buildPlatform)'
