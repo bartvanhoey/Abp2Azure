@@ -363,10 +363,91 @@ Volo.Abp.AbpInitializationException: An error occurred during ConfigureServicesA
  ---> Internal.Cryptography.CryptoThrowHelper+WindowsCryptographicException: Access is denied.
 ```
 
-On the [ABP Support](https://support.abp.io/QA/Questions/3664/Azure-5003-error-Access-Denied) they propose the following solution
+On the [ABP Support](https://support.abp.io/QA/Questions/3664/Azure-5003-error-Access-Denied) they propose the following solution:
+
+* In the [YourAppName]HttpApiHostModule add the code below
+
+```csharp
+
+public override void PreConfigureServices(ServiceConfigurationContext context)
+{
+     var hostingEnvironment = context.Services.GetHostingEnvironment();
+
+     if (!hostingEnvironment.IsDevelopment())
+     {
+         PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
+         {
+             options.AddDevelopmentEncryptionAndSigningCertificate = false;
+         });
+
+         PreConfigure<OpenIddictServerBuilder>(builder =>
+         {
+             // In production, it is recommended to use two RSA certificates, one for encryption, one for signing.
+             builder.AddEncryptionCertificate(GetSigningCertificate(hostingEnvironment, context.Services.GetConfiguration()));
+             builder.AddSigningCertificate(GetSigningCertificate(hostingEnvironment, context.Services.GetConfiguration()));
+         });
+     }
+}
+
+private X509Certificate2 GetSigningCertificate(IWebHostEnvironment hostingEnv, IConfiguration configuration)
+{
+    var fileName = configuration["MyAppCertificate:X590:FileName"]; //*.pfx 
+    var passPhrase = configuration["MyAppCertificate:X590:PassPhrase"]; // pass phrase (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)
+    var file = Path.Combine(hostingEnv.ContentRootPath, fileName);
+
+    if (!File.Exists(file))
+    {
+        throw new FileNotFoundException($"Signing Certificate couldn't found: {file}");
+    }
+
+    return new X509Certificate2(file, passPhrase);
+}
+
+```
+
+* In the appsettings.json file of the [YourAppName]HttpApi.Host project add section below
 
 ```bash
+"MyAppCertificate": { 
+      "X590": 
+        { 
+          "FileName": "encryption-certificate.pfx", 
+          "PassPhrase": "YourPassPhraseHere" 
+          }  
+    }
 ```
+
+* In a temp folder on your computer create a new Console app
+
+```bash  
+    dotnet new console -n OpenIddictSigning
+```  
+
+* Replace the content of the Program.cs file
+
+```csharp
+// See https://aka.ms/new-console-template for more information
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+
+using var algorithm = RSA.Create(keySizeInBits: 2048);
+
+var subject = new X500DistinguishedName("CN=Fabrikam Encryption Certificate");
+var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.KeyEncipherment, critical: true));
+
+var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
+
+File.WriteAllBytes("encryption-certificate.pfx", certificate.Export(X509ContentType.Pfx, "YourPassPhraseHere"));
+
+Console.WriteLine("encryption-certificate.pfx file generated!");
+
+```
+
+* Run the console app to generate the  encryption-certificate.pfx file
+
+
+
 
 
 
