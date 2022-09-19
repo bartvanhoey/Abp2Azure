@@ -357,7 +357,6 @@ steps:
 **ERROR: Internal.Cryptography.CryptoThrowHelper+WindowsCryptographicException: Access is denied.**
 
 ```bash
-
 Host terminated unexpectedly!
 Volo.Abp.AbpInitializationException: An error occurred during ConfigureServicesAsync phase of the module Volo.Abp.OpenIddict.AbpOpenIddictAspNetCoreModule, Volo.Abp.OpenIddict.AspNetCore, Version=6.0.0.0, Culture=neutral, PublicKeyToken=null. See the inner exception for details.
  ---> Internal.Cryptography.CryptoThrowHelper+WindowsCryptographicException: Access is denied.
@@ -382,14 +381,12 @@ public override void PreConfigureServices(ServiceConfigurationContext context)
 
          PreConfigure<OpenIddictServerBuilder>(builder =>
          {
-             // In production, it is recommended to use two RSA certificates, one for encryption, one for signing.
-             builder.AddEncryptionCertificate(GetSigningCertificate(hostingEnvironment, context.Services.GetConfiguration()));
-             builder.AddSigningCertificate(GetSigningCertificate(hostingEnvironment, context.Services.GetConfiguration()));
+             builder.AddEncryptionCertificate(GetEncryptionCertificate(hostingEnvironment, context.Services.GetConfiguration()));
          });
      }
 }
 
-private X509Certificate2 GetSigningCertificate(IWebHostEnvironment hostingEnv, IConfiguration configuration)
+private X509Certificate2 GetEncryptionCertificate(IWebHostEnvironment hostingEnv, IConfiguration configuration)
 {
     var fileName = configuration["MyAppCertificate:X590:FileName"]; //*.pfx 
     var passPhrase = configuration["MyAppCertificate:X590:PassPhrase"]; // pass phrase (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)
@@ -400,7 +397,7 @@ private X509Certificate2 GetSigningCertificate(IWebHostEnvironment hostingEnv, I
         throw new FileNotFoundException($"Signing Certificate couldn't found: {file}");
     }
 
-    return new X509Certificate2(file, passPhrase);
+    return new X509Certificate2(file, passPhrase, X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.MachineKeySet);
 }
 
 ```
@@ -469,7 +466,37 @@ Console.WriteLine("encryption-certificate.pfx file generated!");
     git push
 ```
 
+**ERROR: System.Security.Cryptography.CryptographicException: System cannot find specified file.**
 
+After implementing the suggested solution, the deployed API still threw HTTP Error 502.5 - ANCM Out-Of-Process Startup Failure
+
+To figure out the reason for the failure I started the HttpApi.Host.exe in the Debug Console in the Kudu window
+
+```bash
+  C:\home\site\wwwroot>[YourAppName].HttpApi.Host.exe 
+```
+
+I found out that still something went wrong with finding the certificate
+
+```bash
+Internal.Cryptography.CryptoThrowHelper+WindowsCryptographicException: The system cannot find the file specified.
+   at Internal.Cryptography.Pal.CertificatePal.FilterPFXStore(ReadOnlySpan`1 rawData, SafePasswordHandle password, PfxCertStoreFlags pfxCertStoreFlags
+```
+
+[CryptographicException was unhandled: System cannot find the specified file](https://stackoverflow.com/questions/17840825/cryptographicexception-was-unhandled-system-cannot-find-the-specified-file)
+
+
+The problem was situated in the return statement of the **GetEncryptionCertificate** method.
+I updated the return statement as you can see below:
+
+```csharp
+// from
+return new X509Certificate2(file, passPhrase);
+
+// to
+return new X509Certificate2(file, passPhrase, X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.MachineKeySet);
+
+```
 
 
 

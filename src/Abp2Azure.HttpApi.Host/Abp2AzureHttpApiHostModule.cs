@@ -71,10 +71,9 @@ public class Abp2AzureHttpApiHostModule : AbpModule
 
             PreConfigure((Action<OpenIddictServerBuilder>)(builder =>
             {
-                // In production, it is recommended to use two RSA certificates, one for encryption, one for signing.
                 X509Certificate2 certificate = GetEncryptionCertificate(hostingEnvironment, context.Services.GetConfiguration());
                 builder.AddEncryptionCertificate(certificate);
-                // builder.AddSigningCertificate(GetSigningCertificate(hostingEnvironment, context.Services.GetConfiguration()));
+                
             }));
         }
     }
