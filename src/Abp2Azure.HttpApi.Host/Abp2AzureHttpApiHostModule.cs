@@ -69,15 +69,16 @@ public class Abp2AzureHttpApiHostModule : AbpModule
                 options.AddDevelopmentEncryptionAndSigningCertificate = false;
             });
 
-            PreConfigure<OpenIddictServerBuilder>(builder =>
+            PreConfigure((Action<OpenIddictServerBuilder>)(builder =>
             {
                 // In production, it is recommended to use two RSA certificates, one for encryption, one for signing.
-                builder.AddEncryptionCertificate(GetSigningCertificate(hostingEnvironment, context.Services.GetConfiguration()));
-                builder.AddSigningCertificate(GetSigningCertificate(hostingEnvironment, context.Services.GetConfiguration()));
-            });
+                X509Certificate2 certificate = GetEncryptionCertificate(hostingEnvironment, context.Services.GetConfiguration());
+                builder.AddEncryptionCertificate(certificate);
+                // builder.AddSigningCertificate(GetSigningCertificate(hostingEnvironment, context.Services.GetConfiguration()));
+            }));
         }
     }
-    private X509Certificate2 GetSigningCertificate(IWebHostEnvironment hostingEnv, IConfiguration configuration)
+    private X509Certificate2 GetEncryptionCertificate(IWebHostEnvironment hostingEnv, IConfiguration configuration)
     {
         var fileName = configuration["MyAppCertificate:X590:FileName"]; //*.pfx 
         var passPhrase = configuration["MyAppCertificate:X590:PassPhrase"]; // pass phrase (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)
