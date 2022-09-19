@@ -91,7 +91,7 @@ public class Abp2AzureHttpApiHostModule : AbpModule
 
         Debug.WriteLine($"{file} - {passPhrase}");
 
-        return new X509Certificate2(file, passPhrase);
+        return new X509Certificate2(file, passPhrase, X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.MachineKeySet);
     }
 
     public override void ConfigureServices(ServiceConfigurationContext context)
