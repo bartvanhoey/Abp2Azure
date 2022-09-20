@@ -2,7 +2,7 @@
 
 [![Build Status](https://dev.azure.com/AbpIoAzureDevopsOrg/Abp2AzureProj/_apis/build/status/Abp2AzureBuildPipeline?branchName=main)](https://dev.azure.com/AbpIoAzureDevopsOrg/Abp2AzureProj/_build/latest?definitionId=3&branchName=main)
 
-### Continuous Deployment (CD) of an ABP Framework app to Azure DevOps
+### Continuous Deployment (CD) of an ABP Framework application to Azure DevOps
 
 _Continuous deployment_ is a _software engineering approach_ in which _software functionalities are delivered frequently and through automated deployments_. (Wikipedia)
 
