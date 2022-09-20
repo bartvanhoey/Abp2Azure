@@ -4,11 +4,13 @@
 
 ### Continuous Deployment of an ABP Framework app to Azure DevOps
 
+Continuous deployment (CD) is a software engineering approach in which software functionalities are delivered frequently and through automated deployments. (Wikipedia)
+
 A **step-by-step tutorial** on how to set up **Continuous Deployment in Azure DevOps** of an **ABP Framework application**.
 
 ### Source Code
 
-The sample application has been developed with **Blazor** as UI framework and **SQL Server** as database provider, but the same principles apply for other UI frameworks/database providers.
+The sample application has been developed with **Blazor** as UI framework and **SQL Server** as database provider, but the same principles apply for other **UI frameworks like Angular, MVC or database providers like MongoDb, MySql, Progress**, ...
 
 ### Requirements
 
@@ -28,9 +30,9 @@ The following tools are needed to be able to run the solution.
 
 [4. Set up the Build pipeline in AzureDevops](tutorial/4.set-up-a-build-pipeline-in-azuredevops.md)
 
-[5. Create a Web App in the Azure Portal](tutorial/5.create-a-web-app-in-the-azure-portal-for-the-api-project.md)
+[5. Create a Web App in the Azure Portal for the API](tutorial/5.create-a-web-app-in-the-azure-portal-for-the-api-project.md)
 
-[6. Create Release pipeline and deploy HttpApi.Host project](tutorial/6.create-a-release-pipeline-and-deploy-httpapi-host-project.md)
+[6. Create a Release pipeline to deploy the HttpApi.Host project](tutorial/6.create-a-release-pipeline-and-deploy-httpapi-host-project.md)
 
 [7. API Deployment succeeded. Web App not working. Fix the issues!](tutorial/7.deployment-succeeded-web-app-not-working-fix-the-issues.md)
 
@@ -38,4 +40,4 @@ The following tools are needed to be able to run the solution.
 
 [9. Add a stage in the Release pipeline to deploy the Blazor project](tutorial/9.add-an-extra-stage-in-the-release-pipeline-for-the-blazor-project.md)
 
-[10.Blazor Deployment succeeded. Web App not working. Fix the issues!](tutorial/10.deployment-blazor-project-succeeded-web-app-still-not-working-fix-the-issues.md)
+[10. Blazor Deployment succeeded. Web App not working. Fix the issues!](tutorial/10.deployment-blazor-project-succeeded-web-app-still-not-working-fix-the-issues.md)
