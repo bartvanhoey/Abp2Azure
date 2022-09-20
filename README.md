@@ -2,12 +2,11 @@
 
 [![Build Status](https://dev.azure.com/AbpIoAzureDevopsOrg/Abp2AzureProj/_apis/build/status/Abp2AzureBuildPipeline?branchName=main)](https://dev.azure.com/AbpIoAzureDevopsOrg/Abp2AzureProj/_build/latest?definitionId=3&branchName=main)
 
-### Continuous Deployment of an ABP Framework app to Azure DevOps
+### Continuous Deployment (CD) of an ABP Framework app to Azure DevOps
 
-_Continuous deployment (CD) is a software engineering approach in which software functionalities are delivered frequently and through automated deployments. (Wikipedia)_
+_Continuous deployment_ is a _software engineering approach_ in which _software functionalities are delivered frequently and through automated deployments_. (Wikipedia)
 
-A **step-by-step tutorial** on how to set up **Continuous Deployment in Azure DevOps** of an **ABP Framework application**.
-
+A **step-by-step tutorial** on how to set up **Continuous Deployment** of an **ABP Framework application**.
 
 ### Source Code
 
@@ -21,7 +20,7 @@ The following tools are needed to be able to run the solution.
 * VsCode, Visual Studio 2022 or another compatible IDE
 * ABP CLI version 6.0.0
 
-### Step-by-step Tutorial
+### Step-by-step
 
 [1. Create a new GitHub repository](tutorial/1.create-a-new-github-repository.md)
 
