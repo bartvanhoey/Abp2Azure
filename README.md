@@ -1,4 +1,4 @@
-## ABP Framework to Azure!
+## ABP Framework to Azure
 
 ### Continuous Deployment of an ABP Framework app to Azure DevOps
 
