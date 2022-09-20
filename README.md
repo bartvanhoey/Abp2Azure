@@ -32,13 +32,13 @@ The following tools are needed to be able to run the solution.
 
 [6. Create Release pipeline and deploy HttpApi.Host project](tutorial/6.create-a-release-pipeline-and-deploy-httpapi-host-project.md)
 
-[7. Deployment succeeded, but Web App not working. Fix the issues](tutorial/7.deployment-succeeded-web-app-not-working-fix-the-issues.md)
+[7. API Deployment succeeded. Web App not working. Fix the issues!](tutorial/7.deployment-succeeded-web-app-not-working-fix-the-issues.md)
 
 [8. Create a Web App in the Azure Portal for the Blazor project](tutorial/8.create-a-web-app-in-the-azure-portal-for-the-blazor-project.md)
 
 [9. Add a stage in the Release pipeline to deploy the Blazor project](tutorial/9.add-an-extra-stage-in-the-release-pipeline-for-the-blazor-project.md)
 
-[10. Deployment Blazor project succeeded. Web App not working. Fix the issues!](tutorial/10.deployment-blazor-project-succeeded-web-app-still-not-working-fix-the-issues.md)
+[10.Blazor Deployment succeeded. Web App not working. Fix the issues!](tutorial/10.deployment-blazor-project-succeeded-web-app-still-not-working-fix-the-issues.md)
 
 
 
