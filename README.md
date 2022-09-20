@@ -1,4 +1,4 @@
-## ABP Framework to Azure
+## ABP Framework goes Azure
 
 [![Build Status](https://dev.azure.com/AbpIoAzureDevopsOrg/Abp2AzureProj/_apis/build/status/Abp2AzureBuildPipeline?branchName=main)](https://dev.azure.com/AbpIoAzureDevopsOrg/Abp2AzureProj/_build/latest?definitionId=3&branchName=main)
 
