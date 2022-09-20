@@ -4,9 +4,10 @@
 
 ### Continuous Deployment of an ABP Framework app to Azure DevOps
 
-Continuous deployment (CD) is a software engineering approach in which software functionalities are delivered frequently and through automated deployments. (Wikipedia)
+_Continuous deployment (CD) is a software engineering approach in which software functionalities are delivered frequently and through automated deployments. (Wikipedia)_
 
 A **step-by-step tutorial** on how to set up **Continuous Deployment in Azure DevOps** of an **ABP Framework application**.
+
 
 ### Source Code
 
