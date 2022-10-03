@@ -248,10 +248,10 @@ public class Abp2AzureHttpApiHostModule : AbpModule
 
         app.UseAbpRequestLocalization();
 
-        if (!env.IsDevelopment())
-        {
-            app.UseErrorPage();
-        }
+        // if (!env.IsDevelopment())
+        // {
+        //     app.UseErrorPage();
+        // }
 
         app.UseCorrelationId();
         app.UseStaticFiles();
