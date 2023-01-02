@@ -62,13 +62,15 @@ public class Abp2AzureHttpApiHostModule : AbpModule
 
         var hostingEnvironment = context.Services.GetHostingEnvironment();
 
-        if (!hostingEnvironment.IsDevelopment())
+        if (hostingEnvironment.IsDevelopment())
         {
             PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
             {
                 options.AddDevelopmentEncryptionAndSigningCertificate = false;
             });
-
+        }
+        else  
+        {
             PreConfigure((Action<OpenIddictServerBuilder>)(builder =>
             {
                 X509Certificate2 certificate = GetEncryptionCertificate(hostingEnvironment, context.Services.GetConfiguration());
