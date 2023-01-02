@@ -78,21 +78,22 @@ public class Abp2AzureHttpApiHostModule : AbpModule
             });
         }
     }
-    // private X509Certificate2 GetEncryptionCertificate(IWebHostEnvironment hostingEnv, IConfiguration configuration)
-    // {
-    //     var fileName = configuration["MyAppCertificate:X590:FileName"]; //*.pfx 
-    //     var passPhrase = configuration["MyAppCertificate:X590:PassPhrase"]; // pass phrase (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)
-    //     var file = Path.Combine(hostingEnv.ContentRootPath, fileName);
-    //
-    //     if (!File.Exists(file))
-    //     {
-    //         throw new FileNotFoundException($"Signing Certificate couldn't found: {file}");
-    //     }
-    //
-    //     Debug.WriteLine($"{file} - {passPhrase}");
-    //
-    //     return new X509Certificate2(file, passPhrase, X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.MachineKeySet);
-    // }
+    private X509Certificate2 GetEncryptionCertificate(IWebHostEnvironment hostingEnv, IConfiguration configuration)
+    {
+        var fileName = configuration["MyAppCertificate:X590:FileName"]; //*.pfx 
+        var passPhrase = configuration["MyAppCertificate:X590:PassPhrase"]; // pass phrase (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)
+        var file = Path.Combine(hostingEnv.ContentRootPath, fileName);
+    
+        if (!File.Exists(file))
+        {
+            throw new FileNotFoundException($"Signing Certificate couldn't found: {file}");
+        }
+    
+        Debug.WriteLine($"{file} - {passPhrase}");
+
+        var encryptionCertificate = new X509Certificate2(file, passPhrase, X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.MachineKeySet);
+        return encryptionCertificate;
+    }
     
     private X509Certificate2 GetSigningCertificate(IWebHostEnvironment hostingEnv,
                             IConfiguration configuration)
@@ -117,40 +118,42 @@ public class Abp2AzureHttpApiHostModule : AbpModule
                         HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
     request.CertificateExtensions.Add(new X509KeyUsageExtension(
                         X509KeyUsageFlags.DigitalSignature, critical: true));
-    var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, 
-                        DateTimeOffset.UtcNow.AddYears(2));
-    File.WriteAllBytes(file, certificate.Export(X509ContentType.Pfx, string.Empty));
-    return new X509Certificate2(file, passPhrase, 
-                        X509KeyStorageFlags.MachineKeySet);
-}
-private X509Certificate2 GetEncryptionCertificate(IWebHostEnvironment hostingEnv,
-                             IConfiguration configuration)
-{
-    var fileName = $"cert-encryption.pfx";
-    var passPhrase = configuration["MyAppCertificate:X590:PassPhrase"]; 
-    var file = Path.Combine(hostingEnv.ContentRootPath, fileName);
-    // if (File.Exists(file))
-    // {
-    //     var created = File.GetCreationTime(file);
-    //     var days = (DateTime.Now - created).TotalDays;
-    //     if (days > 180)
-    //         File.Delete(file);
-    //     else
-    //         return new X509Certificate2(file, passPhrase, 
-    //                         X509KeyStorageFlags.MachineKeySet);
-    // }
-    // file doesn't exist or was deleted because it expired
-    using var algorithm = RSA.Create(keySizeInBits: 2048);
-    var subject = new X500DistinguishedName("CN=Fabrikam Encryption Certificate");
-    var request = new CertificateRequest(subject, algorithm, 
-                        HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-    request.CertificateExtensions.Add(new X509KeyUsageExtension(
-                        X509KeyUsageFlags.KeyEncipherment, critical: true));
-    var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow,
-                        DateTimeOffset.UtcNow.AddYears(2));
+    var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
     File.WriteAllBytes(file, certificate.Export(X509ContentType.Pfx, string.Empty));
     return new X509Certificate2(file, passPhrase, X509KeyStorageFlags.MachineKeySet);
+    
+    var encryptionCertificate = new X509Certificate2(file, passPhrase, X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.MachineKeySet);
+    return encryptionCertificate;
 }
+// private X509Certificate2 GetEncryptionCertificate(IWebHostEnvironment hostingEnv,
+//                              IConfiguration configuration)
+// {
+//     var fileName = $"cert-encryption.pfx";
+//     var passPhrase = configuration["MyAppCertificate:X590:PassPhrase"]; 
+//     var file = Path.Combine(hostingEnv.ContentRootPath, fileName);
+//     // if (File.Exists(file))
+//     // {
+//     //     var created = File.GetCreationTime(file);
+//     //     var days = (DateTime.Now - created).TotalDays;
+//     //     if (days > 180)
+//     //         File.Delete(file);
+//     //     else
+//     //         return new X509Certificate2(file, passPhrase, 
+//     //                         X509KeyStorageFlags.MachineKeySet);
+//     // }
+//     // file doesn't exist or was deleted because it expired
+//     using var algorithm = RSA.Create(keySizeInBits: 2048);
+//     var subject = new X500DistinguishedName("CN=Fabrikam Encryption Certificate");
+//     var request = new CertificateRequest(subject, algorithm, 
+//                         HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+//     request.CertificateExtensions.Add(new X509KeyUsageExtension(
+//                         X509KeyUsageFlags.KeyEncipherment, critical: true));
+//     var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow,
+//                         DateTimeOffset.UtcNow.AddYears(2));
+//     File.WriteAllBytes(file, certificate.Export(X509ContentType.Pfx, string.Empty));
+//     var encryptionCertificate = new X509Certificate2(file, passPhrase, X509KeyStorageFlags.MachineKeySet);
+//     return encryptionCertificate;
+// }
     
 
     public override void ConfigureServices(ServiceConfigurationContext context)
