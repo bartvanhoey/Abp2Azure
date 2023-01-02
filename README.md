@@ -14,7 +14,7 @@ The sample application has been developed with **Blazor** as UI framework and **
 
 ### Requirements
 
-The following tools are needed to be able to run the solution:
+The following tools are needed to be able to run the solution.
 
 * .NET 6.0 SDK
 * VsCode, Visual Studio 2022 or another compatible IDE
