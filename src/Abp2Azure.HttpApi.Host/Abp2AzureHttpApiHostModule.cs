@@ -112,15 +112,13 @@ public class Abp2AzureHttpApiHostModule : AbpModule
     //                      X509KeyStorageFlags.MachineKeySet);
     // }
     // file doesn't exist or was deleted because it expired
-    using var algorithm = RSA.Create(keySizeInBits: 2048);
-    var subject = new X500DistinguishedName("CN=Fabrikam Signing Certificate");
-    var request = new CertificateRequest(subject, algorithm, 
-                        HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-    request.CertificateExtensions.Add(new X509KeyUsageExtension(
-                        X509KeyUsageFlags.DigitalSignature, critical: true));
-    var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
-    File.WriteAllBytes(file, certificate.Export(X509ContentType.Pfx, string.Empty));
-    return new X509Certificate2(file, passPhrase, X509KeyStorageFlags.MachineKeySet);
+    // using var algorithm = RSA.Create(keySizeInBits: 2048);
+    // var subject = new X500DistinguishedName("CN=Fabrikam Signing Certificate");
+    // var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+    // request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature, critical: true));
+    // var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
+    // File.WriteAllBytes(file, certificate.Export(X509ContentType.Pfx, string.Empty));
+    // return new X509Certificate2(file, passPhrase, X509KeyStorageFlags.MachineKeySet);
     
     var encryptionCertificate = new X509Certificate2(file, passPhrase, X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.MachineKeySet);
     return encryptionCertificate;
