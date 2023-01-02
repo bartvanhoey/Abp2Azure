@@ -63,55 +63,75 @@ public class Abp2AzureHttpApiHostModule : AbpModule
 
         var hostingEnvironment = context.Services.GetHostingEnvironment();
 
-        if (!hostingEnvironment.IsDevelopment())
+        if (hostingEnvironment.IsDevelopment()) return;
+
+        PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
         {
-            PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
-            {
-                options.AddDevelopmentEncryptionAndSigningCertificate = false;
-            });
-            PreConfigure<OpenIddictServerBuilder>(builder =>
-            {
-                // In production, it is recommended to use two RSA certificates, 
-                // one for encryption, one for signing.
-                builder.AddEncryptionCertificate(GetEncryptionCertificate(hostingEnvironment, context.Services.GetConfiguration()));
-                builder.AddSigningCertificate(GetSigningCertificate(hostingEnvironment, context.Services.GetConfiguration()));
-            });
-        }
+            options.AddDevelopmentEncryptionAndSigningCertificate = false;
+        });
+
+        PreConfigure<OpenIddictServerBuilder>(builder =>
+        {
+            builder.AddEncryptionCertificate(GetEncryptionCertificate(hostingEnvironment,
+                context.Services.GetConfiguration()));
+            builder.AddSigningCertificate(
+                GetSigningCertificate(hostingEnvironment, context.Services.GetConfiguration()));
+        });
     }
+
     private X509Certificate2 GetEncryptionCertificate(IWebHostEnvironment hostingEnv, IConfiguration configuration)
     {
         var fileName = configuration["MyAppCertificate:X590:EncryptionFileName"]; //*.pfx 
-        var passPhrase = configuration["MyAppCertificate:X590:EncryptionPassPhrase"]; // pass phrase (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)
+        var passPhrase =
+            configuration[
+                "MyAppCertificate:X590:EncryptionPassPhrase"]; // pass phrase (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)
         var file = Path.Combine(hostingEnv.ContentRootPath, fileName);
-    
+
         if (!File.Exists(file))
         {
             throw new FileNotFoundException($"Signing Certificate couldn't found: {file}");
         }
-    
+
         Debug.WriteLine($"{file} - {passPhrase}");
 
-        var encryptionCertificate = new X509Certificate2(file, passPhrase, X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.MachineKeySet);
+        var encryptionCertificate = new X509Certificate2(file, passPhrase,
+            X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.MachineKeySet);
         return encryptionCertificate;
     }
-    
-    private X509Certificate2 GetSigningCertificate(IWebHostEnvironment hostingEnv,
-                            IConfiguration configuration)
-{
-    var fileName = configuration["MyAppCertificate:X590:SigningFileName"]; //*.pfx 
-    var passPhrase = configuration["MyAppCertificate:X590:SigningPassPhrase"]; // pass phrase (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)
-    var file = Path.Combine(hostingEnv.ContentRootPath, fileName);
-    
-    if (!File.Exists(file))
-    {
-        throw new FileNotFoundException($"Signing Certificate couldn't found: {file}");
-    }
-    
-    Debug.WriteLine($"{file} - {passPhrase}");
 
-    var encryptionCertificate = new X509Certificate2(file, passPhrase, X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.MachineKeySet);
-    return encryptionCertificate;
-}
+    private X509Certificate2 GetSigningCertificate(IWebHostEnvironment hostingEnv,
+        IConfiguration configuration)
+    {
+        var fileName = configuration["MyAppCertificate:X590:SigningFileName"]; //*.pfx 
+        var passPhrase =
+            configuration[
+                "MyAppCertificate:X590:SigningPassPhrase"]; // pass phrase (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)
+        var file = Path.Combine(hostingEnv.ContentRootPath, fileName);
+
+        if (!File.Exists(file))
+        {
+            throw new FileNotFoundException($"Signing Certificate couldn't found: {file}");
+        }
+
+        Debug.WriteLine($"{file} - {passPhrase}");
+
+        // var encryptionCertificate = new X509Certificate2(file, passPhrase, X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.MachineKeySet);
+        // return encryptionCertificate;
+        //
+        using var algorithm = RSA.Create(keySizeInBits: 2048);
+
+        var subject = new X500DistinguishedName("CN=Fabrikam Signing Certificate");
+        var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature,
+            critical: true));
+
+        var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
+
+        File.WriteAllBytes(fileName, certificate.Export(X509ContentType.Pfx, passPhrase));
+        var signingCertificate = new X509Certificate2(file, passPhrase,
+            X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.MachineKeySet);
+        return signingCertificate;
+    }
 // private X509Certificate2 GetEncryptionCertificate(IWebHostEnvironment hostingEnv,
 //                              IConfiguration configuration)
 // {
@@ -141,7 +161,7 @@ public class Abp2AzureHttpApiHostModule : AbpModule
 //     var encryptionCertificate = new X509Certificate2(file, passPhrase, X509KeyStorageFlags.MachineKeySet);
 //     return encryptionCertificate;
 // }
-    
+
 
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
@@ -160,7 +180,8 @@ public class Abp2AzureHttpApiHostModule : AbpModule
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
     {
-        context.Services.ForwardIdentityAuthenticationForBearer(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
+        context.Services.ForwardIdentityAuthenticationForBearer(OpenIddictValidationAspNetCoreDefaults
+            .AuthenticationScheme);
     }
 
     private void ConfigureBundles()
@@ -169,10 +190,7 @@ public class Abp2AzureHttpApiHostModule : AbpModule
         {
             options.StyleBundles.Configure(
                 LeptonXLiteThemeBundles.Styles.Global,
-                bundle =>
-                {
-                    bundle.AddFiles("/global-styles.css");
-                }
+                bundle => { bundle.AddFiles("/global-styles.css"); }
             );
         });
     }
@@ -227,7 +245,7 @@ public class Abp2AzureHttpApiHostModule : AbpModule
             configuration["AuthServer:Authority"],
             new Dictionary<string, string>
             {
-                    {"Abp2Azure", "Abp2Azure API"}
+                { "Abp2Azure", "Abp2Azure API" }
             },
             options =>
             {
@@ -269,20 +287,20 @@ public class Abp2AzureHttpApiHostModule : AbpModule
         context.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(builder =>
-               {
-                   builder
-                       .WithOrigins(
-                           configuration["App:CorsOrigins"]
-                               .Split(",", StringSplitOptions.RemoveEmptyEntries)
-                               .Select(o => o.RemovePostFix("/"))
-                               .ToArray()
-                       )
-                       .WithAbpExposedHeaders()
-                       .SetIsOriginAllowedToAllowWildcardSubdomains()
-                       .AllowAnyHeader()
-                       .AllowAnyMethod()
-                       .AllowCredentials();
-               });
+            {
+                builder
+                    .WithOrigins(
+                        configuration["App:CorsOrigins"]
+                            .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                            .Select(o => o.RemovePostFix("/"))
+                            .ToArray()
+                    )
+                    .WithAbpExposedHeaders()
+                    .SetIsOriginAllowedToAllowWildcardSubdomains()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
         });
     }
 
