@@ -73,10 +73,8 @@ public class Abp2AzureHttpApiHostModule : AbpModule
             {
                 // In production, it is recommended to use two RSA certificates, 
                 // one for encryption, one for signing.
-                builder.AddEncryptionCertificate(
-                    GetEncryptionCertificate(hostingEnvironment, context.Services.GetConfiguration()));
-                builder.AddSigningCertificate(
-                    GetSigningCertificate(hostingEnvironment, context.Services.GetConfiguration()));
+                builder.AddEncryptionCertificate(GetEncryptionCertificate(hostingEnvironment, context.Services.GetConfiguration()));
+                builder.AddSigningCertificate(GetSigningCertificate(hostingEnvironment, context.Services.GetConfiguration()));
             });
         }
     }
@@ -102,16 +100,16 @@ public class Abp2AzureHttpApiHostModule : AbpModule
     var fileName = $"cert-signing.pfx";
     var passPhrase = configuration["MyAppCertificate:X590:PassPhrase"]; 
     var file = Path.Combine(hostingEnv.ContentRootPath, fileName);        
-    if (File.Exists(file))
-    {
-        var created = File.GetCreationTime(file);
-        var days = (DateTime.Now - created).TotalDays;
-        if (days > 180)          
-            File.Delete(file);
-        else
-            return new X509Certificate2(file, passPhrase,
-                         X509KeyStorageFlags.MachineKeySet);
-    }
+    // if (File.Exists(file))
+    // {
+    //     var created = File.GetCreationTime(file);
+    //     var days = (DateTime.Now - created).TotalDays;
+    //     if (days > 180)          
+    //         File.Delete(file);
+    //     else
+    //         return new X509Certificate2(file, passPhrase,
+    //                      X509KeyStorageFlags.MachineKeySet);
+    // }
     // file doesn't exist or was deleted because it expired
     using var algorithm = RSA.Create(keySizeInBits: 2048);
     var subject = new X500DistinguishedName("CN=Fabrikam Signing Certificate");
@@ -131,16 +129,16 @@ private X509Certificate2 GetEncryptionCertificate(IWebHostEnvironment hostingEnv
     var fileName = $"cert-encryption.pfx";
     var passPhrase = configuration["MyAppCertificate:X590:PassPhrase"]; 
     var file = Path.Combine(hostingEnv.ContentRootPath, fileName);
-    if (File.Exists(file))
-    {
-        var created = File.GetCreationTime(file);
-        var days = (DateTime.Now - created).TotalDays;
-        if (days > 180)
-            File.Delete(file);
-        else
-            return new X509Certificate2(file, passPhrase, 
-                            X509KeyStorageFlags.MachineKeySet);
-    }
+    // if (File.Exists(file))
+    // {
+    //     var created = File.GetCreationTime(file);
+    //     var days = (DateTime.Now - created).TotalDays;
+    //     if (days > 180)
+    //         File.Delete(file);
+    //     else
+    //         return new X509Certificate2(file, passPhrase, 
+    //                         X509KeyStorageFlags.MachineKeySet);
+    // }
     // file doesn't exist or was deleted because it expired
     using var algorithm = RSA.Create(keySizeInBits: 2048);
     var subject = new X500DistinguishedName("CN=Fabrikam Encryption Certificate");
