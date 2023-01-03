@@ -60,9 +60,9 @@ public class Abp2AzureHttpApiHostModule : AbpModule
             });
         });
 
-        var hostingEnvironment = context.Services.GetHostingEnvironment();
+         var hostingEnvironment = context.Services.GetHostingEnvironment();
 
-        if (hostingEnvironment.IsDevelopment()) return;
+       if (hostingEnvironment.IsDevelopment()) return;
 
         PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
         {
