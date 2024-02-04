@@ -25,13 +25,10 @@ using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Autofac;
 using Volo.Abp.Localization;
 using Volo.Abp.Modularity;
+using Volo.Abp.Security.Claims;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
-using System.Security.Cryptography.X509Certificates;
-using Volo.Abp.OpenIddict;
-using Microsoft.AspNetCore.Hosting;
-using System.Security.Cryptography;
 
 namespace Abp2Azure;
 
@@ -59,90 +56,7 @@ public class Abp2AzureHttpApiHostModule : AbpModule
                 options.UseAspNetCore();
             });
         });
-
-         var hostingEnvironment = context.Services.GetHostingEnvironment();
-
-       if (hostingEnvironment.IsDevelopment()) return;
-
-        PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
-        {
-            options.AddDevelopmentEncryptionAndSigningCertificate = false;
-        });
-
-        PreConfigure<OpenIddictServerBuilder>(builder =>
-        {
-            builder.AddEncryptionCertificate(GetEncryptionCertificate(hostingEnvironment,
-                context.Services.GetConfiguration()));
-            builder.AddSigningCertificate(
-                GetSigningCertificate(hostingEnvironment, context.Services.GetConfiguration()));
-        });
     }
-
-        private X509Certificate2 GetEncryptionCertificate(IWebHostEnvironment environment, IConfiguration config)
-    {
-        var fileName = "encryption-certificate.pfx";
-        var password = config["MyAppCertificate:X590:Password"];
-
-        var file = Path.Combine(environment.ContentRootPath, fileName);
-        if (File.Exists(file))
-        {
-            var created = File.GetCreationTime(file);
-            var days = (DateTime.Now - created).TotalDays;
-            if (days > 180)
-            {
-                File.Delete(file);
-            }
-            else
-            {
-                return new X509Certificate2(file, password, X509KeyStorageFlags.MachineKeySet);
-            }
-        }
-
-
-        using var algorithm = RSA.Create(keySizeInBits: 2048);
-        var subject = new X500DistinguishedName("CN=Fabrikam Encryption Certificate");
-        var request = new CertificateRequest(subject, algorithm,
-            HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-        request.CertificateExtensions.Add(new X509KeyUsageExtension(
-            X509KeyUsageFlags.KeyEncipherment, critical: true));
-        var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow,
-            DateTimeOffset.UtcNow.AddYears(2));
-        File.WriteAllBytes(file, certificate.Export(X509ContentType.Pfx, password));
-        return new X509Certificate2(file, password, X509KeyStorageFlags.MachineKeySet);
-    }
-
-    private X509Certificate2 GetSigningCertificate(IWebHostEnvironment environment, IConfiguration config)
-    {
-        var fileName = "signing-certificate.pfx";
-        var password = config["MyAppCertificate:X590:Password"];
-        var file = Path.Combine(environment.ContentRootPath, fileName);
-
-        if (File.Exists(file))
-        {
-            var created = File.GetCreationTime(file);
-            var days = (DateTime.Now - created).TotalDays;
-            if (days > 180)
-            {
-                File.Delete(file);
-            }
-            else
-            {
-                return new X509Certificate2(file, password, X509KeyStorageFlags.MachineKeySet);
-            }
-        }
-
-        using var algorithm = RSA.Create(keySizeInBits: 2048);
-        var subject = new X500DistinguishedName("CN=Fabrikam Signing Certificate");
-        var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-        request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature,
-            critical: true));
-
-        var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
-
-        File.WriteAllBytes(file, certificate.Export(X509ContentType.Pfx, password));
-        return new X509Certificate2(file, password, X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.MachineKeySet);
-    }
-
 
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
@@ -161,6 +75,10 @@ public class Abp2AzureHttpApiHostModule : AbpModule
     private void ConfigureAuthentication(ServiceConfigurationContext context)
     {
         context.Services.ForwardIdentityAuthenticationForBearer(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
+        context.Services.Configure<AbpClaimsPrincipalFactoryOptions>(options =>
+        {
+            options.IsDynamicClaimsEnabled = true;
+        });
     }
 
     private void ConfigureBundles()
@@ -182,7 +100,7 @@ public class Abp2AzureHttpApiHostModule : AbpModule
         Configure<AppUrlOptions>(options =>
         {
             options.Applications["MVC"].RootUrl = configuration["App:SelfUrl"];
-            options.RedirectAllowedUrls.AddRange(configuration["App:RedirectAllowedUrls"].Split(','));
+            options.RedirectAllowedUrls.AddRange(configuration["App:RedirectAllowedUrls"]?.Split(',') ?? Array.Empty<string>());
 
             options.Applications["Angular"].RootUrl = configuration["App:ClientUrl"];
             options.Applications["Angular"].Urls[AccountUrlNames.PasswordReset] = "account/reset-password";
@@ -224,7 +142,7 @@ public class Abp2AzureHttpApiHostModule : AbpModule
     private static void ConfigureSwaggerServices(ServiceConfigurationContext context, IConfiguration configuration)
     {
         context.Services.AddAbpSwaggerGenWithOAuth(
-            configuration["AuthServer:Authority"],
+            configuration["AuthServer:Authority"]!,
             new Dictionary<string, string>
             {
                     {"Abp2Azure", "Abp2Azure API"}
@@ -242,14 +160,12 @@ public class Abp2AzureHttpApiHostModule : AbpModule
         context.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(builder =>
-               {
+            {
                 builder
-                    .WithOrigins(
-                        configuration["App:CorsOrigins"]
-                            .Split(",", StringSplitOptions.RemoveEmptyEntries)
-                            .Select(o => o.RemovePostFix("/"))
-                            .ToArray()
-                    )
+                    .WithOrigins(configuration["App:CorsOrigins"]?
+                        .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                        .Select(o => o.RemovePostFix("/"))
+                        .ToArray() ?? Array.Empty<string>())
                     .WithAbpExposedHeaders()
                     .SetIsOriginAllowedToAllowWildcardSubdomains()
                     .AllowAnyHeader()
@@ -287,8 +203,8 @@ public class Abp2AzureHttpApiHostModule : AbpModule
         {
             app.UseMultiTenancy();
         }
-
         app.UseUnitOfWork();
+        app.UseDynamicClaims();
         app.UseAuthorization();
 
         app.UseSwagger();

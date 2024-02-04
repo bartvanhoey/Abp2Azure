@@ -20,7 +20,7 @@ public class EntityFrameworkCoreAbp2AzureDbSchemaMigrator
 
     public async Task MigrateAsync()
     {
-        /* We intentionally resolving the Abp2AzureDbContext
+        /* We intentionally resolve the Abp2AzureDbContext
          * from IServiceProvider (instead of directly injecting it)
          * to properly get the connection string of the current tenant in the
          * current scope.

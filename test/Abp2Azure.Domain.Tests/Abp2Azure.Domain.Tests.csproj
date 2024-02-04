@@ -3,16 +3,18 @@
   <Import Project="..\..\common.props" />
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
     <RootNamespace>Abp2Azure</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Abp2Azure.EntityFrameworkCore.Tests\Abp2Azure.EntityFrameworkCore.Tests.csproj" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+    <ProjectReference Include="..\..\src\Abp2Azure.Domain\Abp2Azure.Domain.csproj" />
+    <ProjectReference Include="..\Abp2Azure.TestBase\Abp2Azure.TestBase.csproj" />
   </ItemGroup>
 
 </Project>

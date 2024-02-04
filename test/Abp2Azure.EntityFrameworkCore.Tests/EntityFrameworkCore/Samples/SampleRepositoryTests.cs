@@ -14,6 +14,7 @@ namespace Abp2Azure.EntityFrameworkCore.Samples;
  * (like default AppUser repository IRepository<AppUser, Guid> here).
  * Only test your custom repository methods.
  */
+[Collection(Abp2AzureTestConsts.CollectionDefinitionName)]
 public class SampleRepositoryTests : Abp2AzureEntityFrameworkCoreTestBase
 {
     private readonly IRepository<IdentityUser, Guid> _appUserRepository;

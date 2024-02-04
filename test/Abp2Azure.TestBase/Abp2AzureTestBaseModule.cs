@@ -13,15 +13,10 @@ namespace Abp2Azure;
     typeof(AbpAutofacModule),
     typeof(AbpTestBaseModule),
     typeof(AbpAuthorizationModule),
-    typeof(Abp2AzureDomainModule)
+    typeof(AbpBackgroundJobsAbstractionsModule)
     )]
 public class Abp2AzureTestBaseModule : AbpModule
 {
-    public override void PreConfigureServices(ServiceConfigurationContext context)
-    {
-
-    }
-
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
         Configure<AbpBackgroundJobOptions>(options =>

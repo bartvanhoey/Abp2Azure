@@ -11,5 +11,4 @@ namespace Abp2Azure.DbMigrator;
     )]
 public class Abp2AzureDbMigratorModule : AbpModule
 {
-
 }
