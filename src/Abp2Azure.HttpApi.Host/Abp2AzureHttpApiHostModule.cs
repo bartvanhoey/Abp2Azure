@@ -65,20 +65,20 @@ public class Abp2AzureHttpApiHostModule : AbpModule
             var hostingEnvironment = context.Services.GetHostingEnvironment();
             var configuration = context.Services.GetConfiguration();
 
-            //  if (hostingEnvironment.IsDevelopment()) return;
+            if (hostingEnvironment.IsDevelopment()) return;
 
-        PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
-        {
-            options.AddDevelopmentEncryptionAndSigningCertificate = false;
-        });
+            PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
+            {
+                options.AddDevelopmentEncryptionAndSigningCertificate = false;
+            });
 
-        PreConfigure<OpenIddictServerBuilder>(builder =>
-        {
-            builder.AddEncryptionCertificate(GetEncryptionCertificate(hostingEnvironment, context.Services.GetConfiguration()));
-            builder.AddSigningCertificate(GetSigningCertificate(hostingEnvironment, context.Services.GetConfiguration()));
-            builder.SetIssuer(new Uri(configuration["AuthServer:Authority"]!));
+            // PreConfigure<OpenIddictServerBuilder>(builder =>
+            // {
+            //     builder.AddEncryptionCertificate(GetEncryptionCertificate(hostingEnvironment, context.Services.GetConfiguration()));
+            //     builder.AddSigningCertificate(GetSigningCertificate(hostingEnvironment, context.Services.GetConfiguration()));
+            //     builder.SetIssuer(new Uri(configuration["AuthServer:Authority"]!));
 
-        });
+            // });
 
 
 
@@ -86,7 +86,7 @@ public class Abp2AzureHttpApiHostModule : AbpModule
         });
     }
 
-private X509Certificate2 GetEncryptionCertificate(IWebHostEnvironment environment, IConfiguration config)
+    private X509Certificate2 GetEncryptionCertificate(IWebHostEnvironment environment, IConfiguration config)
     {
         var fileName = "encryption-certificate.pfx";
         var password = config["MyAppCertificate:X590:Password"];
