@@ -17,7 +17,7 @@
           "request": "launch",
           "preLaunchTask": "buildApi",
           // If you have changed target frameworks, make sure to update the program path.
-          "program": "${workspaceFolder}/src/Abp2Azure.HttpApi.Host/bin/Debug/net6.0/Abp2Azure.HttpApi.Host.dll",
+          "program": "${workspaceFolder}/src/Abp2Azure.HttpApi.Host/bin/Debug/net7.0/Abp2Azure.HttpApi.Host.dll",
           "args": [],
           "cwd": "${workspaceFolder}/src/Abp2Azure.HttpApi.Host",
           "stopAtEntry": false,
@@ -39,7 +39,7 @@
           "request": "launch",
           "preLaunchTask": "buildApi",
           // If you have changed target frameworks, make sure to update the program path.
-          "program": "${workspaceFolder}/src/Abp2Azure.HttpApi.Host/bin/Debug/net6.0/Abp2Azure.HttpApi.Host.dll",
+          "program": "${workspaceFolder}/src/Abp2Azure.HttpApi.Host/bin/Debug/net7.0/Abp2Azure.HttpApi.Host.dll",
           "args": [],
           "cwd": "${workspaceFolder}/src/Abp2Azure.HttpApi.Host",
           "stopAtEntry": false,
@@ -61,7 +61,7 @@
           "request": "launch",
           "preLaunchTask": "buildDbMigrator",
           // If you have changed target frameworks, make sure to update the program path.
-          "program": "${workspaceFolder}/src/Abp2Azure.DbMigrator/bin/Debug/net6.0/Abp2Azure.DbMigrator.dll",
+          "program": "${workspaceFolder}/src/Abp2Azure.DbMigrator/bin/Debug/net7.0/Abp2Azure.DbMigrator.dll",
           "args": [],
           "cwd": "${workspaceFolder}/src/Abp2Azure.DbMigrator",
           "stopAtEntry": false,
@@ -83,7 +83,7 @@
           "request": "launch",
           "preLaunchTask": "buildDbMigrator",
           // If you have changed target frameworks, make sure to update the program path.
-          "program": "${workspaceFolder}/src/Abp2Azure.DbMigrator/bin/Debug/net6.0/Abp2Azure.DbMigrator.dll",
+          "program": "${workspaceFolder}/src/Abp2Azure.DbMigrator/bin/Debug/net7.0/Abp2Azure.DbMigrator.dll",
           "args": [],
           "cwd": "${workspaceFolder}/src/Abp2Azure.DbMigrator",
           "stopAtEntry": false,

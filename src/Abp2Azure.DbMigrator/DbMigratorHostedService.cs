@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Abp2Azure.Data;
 using Serilog;
 using Volo.Abp;
+using Volo.Abp.Data;
 
 namespace Abp2Azure.DbMigrator;
 
@@ -27,6 +28,7 @@ public class DbMigratorHostedService : IHostedService
            options.Services.ReplaceConfiguration(_configuration);
            options.UseAutofac();
            options.Services.AddLogging(c => c.AddSerilog());
+           options.AddDataMigrationEnvironment();
         }))
         {
             await application.InitializeAsync();

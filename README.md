@@ -2,25 +2,27 @@
 
 [![Build Status](https://dev.azure.com/AbpIoAzureDevopsOrg/Abp2AzureProj/_apis/build/status/Abp2AzureBuildPipeline?branchName=main)](https://dev.azure.com/AbpIoAzureDevopsOrg/Abp2AzureProj/_build/latest?definitionId=3&branchName=main)
 
-### Continuous Deployment (CD) of an ABP Framework application to Azure DevOps
+A **step-by-step tutorial** on how to set up **Continuous Deployment** of an **ABP Framework** application.
+
+#### Continuous Deployment (CD) of an ABP Framework application to Azure DevOps
 
 _Continuous deployment_ is a _software engineering approach_ in which _software functionalities are delivered frequently and through automated deployments_. (Wikipedia)
 
-A **step-by-step tutorial** on how to set up **Continuous Deployment** of an **ABP Framework application**.
-
-### Source Code
+#### Source Code
 
 The sample application has been developed with **Blazor** as UI framework and **SQL Server** as database provider, but the same principles apply for other **UI frameworks like Angular, MVC or database providers like MongoDb, MySql, Progress**, ...
 
-### Requirements
+ATTENTION: This tutorial is by no means production-ready and just serves as a guide to point you in the right direction.
+
+#### Requirements
 
 The following tools are needed to be able to run the solution.
 
-* .NET 6.0 SDK
+* .NET 7.0 SDK
 * VsCode, Visual Studio 2022 or another compatible IDE
-* ABP CLI version 6.0.0
+* ABP CLI version 7.0.0
 
-### Step-by-step
+#### Step-by-step
 
 [1. Create a new GitHub repository](tutorial/1.create-a-new-github-repository.md)
 

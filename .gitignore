@@ -188,6 +188,7 @@ ClientBin/
 *~
 *.dbmdl
 *.dbproj.schemaview
+*.pfx
 *.publishsettings
 node_modules/
 orleans.codegen.cs
@@ -261,4 +262,4 @@ src/Abp2Azure.Blazor.Server/Logs/*
 src/Abp2Azure.Blazor.Server.Tiered/Logs/*
 
 # Use abp install-libs to restore.
-# **/wwwroot/libs/*
+**/wwwroot/libs/*

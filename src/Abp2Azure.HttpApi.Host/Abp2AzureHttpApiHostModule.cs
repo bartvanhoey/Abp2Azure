@@ -28,10 +28,10 @@ using Volo.Abp.Modularity;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
-using Volo.Abp.OpenIddict;
 using System.Security.Cryptography.X509Certificates;
+using Volo.Abp.OpenIddict;
 using Microsoft.AspNetCore.Hosting;
-using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace Abp2Azure;
 
@@ -60,38 +60,89 @@ public class Abp2AzureHttpApiHostModule : AbpModule
             });
         });
 
-        var hostingEnvironment = context.Services.GetHostingEnvironment();
+         var hostingEnvironment = context.Services.GetHostingEnvironment();
 
-        if (!hostingEnvironment.IsDevelopment())
+       if (hostingEnvironment.IsDevelopment()) return;
+
+        PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
         {
-            PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
-            {
-                options.AddDevelopmentEncryptionAndSigningCertificate = false;
-            });
+            options.AddDevelopmentEncryptionAndSigningCertificate = false;
+        });
 
-            PreConfigure((Action<OpenIddictServerBuilder>)(builder =>
-            {
-                X509Certificate2 certificate = GetEncryptionCertificate(hostingEnvironment, context.Services.GetConfiguration());
-                builder.AddEncryptionCertificate(certificate);
-                
-            }));
-        }
+        PreConfigure<OpenIddictServerBuilder>(builder =>
+        {
+            builder.AddEncryptionCertificate(GetEncryptionCertificate(hostingEnvironment,
+                context.Services.GetConfiguration()));
+            builder.AddSigningCertificate(
+                GetSigningCertificate(hostingEnvironment, context.Services.GetConfiguration()));
+        });
     }
-    private X509Certificate2 GetEncryptionCertificate(IWebHostEnvironment hostingEnv, IConfiguration configuration)
+
+        private X509Certificate2 GetEncryptionCertificate(IWebHostEnvironment environment, IConfiguration config)
     {
-        var fileName = configuration["MyAppCertificate:X590:FileName"]; //*.pfx 
-        var passPhrase = configuration["MyAppCertificate:X590:PassPhrase"]; // pass phrase (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)
-        var file = Path.Combine(hostingEnv.ContentRootPath, fileName);
+        var fileName = "encryption-certificate.pfx";
+        var password = config["MyAppCertificate:X590:Password"];
 
-        if (!File.Exists(file))
+        var file = Path.Combine(environment.ContentRootPath, fileName);
+        if (File.Exists(file))
         {
-            throw new FileNotFoundException($"Signing Certificate couldn't found: {file}");
+            var created = File.GetCreationTime(file);
+            var days = (DateTime.Now - created).TotalDays;
+            if (days > 180)
+            {
+                File.Delete(file);
+            }
+            else
+            {
+                return new X509Certificate2(file, password, X509KeyStorageFlags.MachineKeySet);
+            }
         }
 
-        Debug.WriteLine($"{file} - {passPhrase}");
 
-        return new X509Certificate2(file, passPhrase, X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.MachineKeySet);
+        using var algorithm = RSA.Create(keySizeInBits: 2048);
+        var subject = new X500DistinguishedName("CN=Fabrikam Encryption Certificate");
+        var request = new CertificateRequest(subject, algorithm,
+            HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        request.CertificateExtensions.Add(new X509KeyUsageExtension(
+            X509KeyUsageFlags.KeyEncipherment, critical: true));
+        var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow,
+            DateTimeOffset.UtcNow.AddYears(2));
+        File.WriteAllBytes(file, certificate.Export(X509ContentType.Pfx, password));
+        return new X509Certificate2(file, password, X509KeyStorageFlags.MachineKeySet);
     }
+
+    private X509Certificate2 GetSigningCertificate(IWebHostEnvironment environment, IConfiguration config)
+    {
+        var fileName = "signing-certificate.pfx";
+        var password = config["MyAppCertificate:X590:Password"];
+        var file = Path.Combine(environment.ContentRootPath, fileName);
+
+        if (File.Exists(file))
+        {
+            var created = File.GetCreationTime(file);
+            var days = (DateTime.Now - created).TotalDays;
+            if (days > 180)
+            {
+                File.Delete(file);
+            }
+            else
+            {
+                return new X509Certificate2(file, password, X509KeyStorageFlags.MachineKeySet);
+            }
+        }
+
+        using var algorithm = RSA.Create(keySizeInBits: 2048);
+        var subject = new X500DistinguishedName("CN=Fabrikam Signing Certificate");
+        var request = new CertificateRequest(subject, algorithm, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature,
+            critical: true));
+
+        var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddYears(2));
+
+        File.WriteAllBytes(file, certificate.Export(X509ContentType.Pfx, password));
+        return new X509Certificate2(file, password, X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.MachineKeySet);
+    }
+
 
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
@@ -102,7 +153,6 @@ public class Abp2AzureHttpApiHostModule : AbpModule
         ConfigureBundles();
         ConfigureUrls(configuration);
         ConfigureConventionalControllers();
-        ConfigureLocalization();
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
         ConfigureSwaggerServices(context, configuration);
@@ -187,52 +237,25 @@ public class Abp2AzureHttpApiHostModule : AbpModule
             });
     }
 
-    private void ConfigureLocalization()
-    {
-        Configure<AbpLocalizationOptions>(options =>
-        {
-            options.Languages.Add(new LanguageInfo("ar", "ar", "العربية"));
-            options.Languages.Add(new LanguageInfo("cs", "cs", "Čeština"));
-            options.Languages.Add(new LanguageInfo("en", "en", "English"));
-            options.Languages.Add(new LanguageInfo("en-GB", "en-GB", "English (UK)"));
-            options.Languages.Add(new LanguageInfo("fi", "fi", "Finnish"));
-            options.Languages.Add(new LanguageInfo("fr", "fr", "Français"));
-            options.Languages.Add(new LanguageInfo("hi", "hi", "Hindi", "in"));
-            options.Languages.Add(new LanguageInfo("is", "is", "Icelandic", "is"));
-            options.Languages.Add(new LanguageInfo("it", "it", "Italiano", "it"));
-            options.Languages.Add(new LanguageInfo("hu", "hu", "Magyar"));
-            options.Languages.Add(new LanguageInfo("pt-BR", "pt-BR", "Português"));
-            options.Languages.Add(new LanguageInfo("ro-RO", "ro-RO", "Română"));
-            options.Languages.Add(new LanguageInfo("ru", "ru", "Русский"));
-            options.Languages.Add(new LanguageInfo("sk", "sk", "Slovak"));
-            options.Languages.Add(new LanguageInfo("tr", "tr", "Türkçe"));
-            options.Languages.Add(new LanguageInfo("zh-Hans", "zh-Hans", "简体中文"));
-            options.Languages.Add(new LanguageInfo("zh-Hant", "zh-Hant", "繁體中文"));
-            options.Languages.Add(new LanguageInfo("de-DE", "de-DE", "Deutsch", "de"));
-            options.Languages.Add(new LanguageInfo("es", "es", "Español", "es"));
-            options.Languages.Add(new LanguageInfo("el", "el", "Ελληνικά"));
-        });
-    }
-
     private void ConfigureCors(ServiceConfigurationContext context, IConfiguration configuration)
     {
         context.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(builder =>
                {
-                   builder
-                       .WithOrigins(
-                           configuration["App:CorsOrigins"]
-                               .Split(",", StringSplitOptions.RemoveEmptyEntries)
-                               .Select(o => o.RemovePostFix("/"))
-                               .ToArray()
-                       )
-                       .WithAbpExposedHeaders()
-                       .SetIsOriginAllowedToAllowWildcardSubdomains()
-                       .AllowAnyHeader()
-                       .AllowAnyMethod()
-                       .AllowCredentials();
-               });
+                builder
+                    .WithOrigins(
+                        configuration["App:CorsOrigins"]
+                            .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                            .Select(o => o.RemovePostFix("/"))
+                            .ToArray()
+                    )
+                    .WithAbpExposedHeaders()
+                    .SetIsOriginAllowedToAllowWildcardSubdomains()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
         });
     }
 
@@ -248,10 +271,10 @@ public class Abp2AzureHttpApiHostModule : AbpModule
 
         app.UseAbpRequestLocalization();
 
-        // if (!env.IsDevelopment())
-        // {
-        //     app.UseErrorPage();
-        // }
+        if (!env.IsDevelopment())
+        {
+            app.UseErrorPage();
+        }
 
         app.UseCorrelationId();
         app.UseStaticFiles();

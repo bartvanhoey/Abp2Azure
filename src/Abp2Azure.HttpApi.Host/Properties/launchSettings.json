@@ -3,8 +3,8 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "https://localhost:44329",
-      "sslPort": 44329
+      "applicationUrl": "https://localhost:44374",
+      "sslPort": 44374
     }
   },
   "profiles": {
@@ -18,7 +18,7 @@
     "Abp2Azure.HttpApi.Host": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:44329",
+      "applicationUrl": "https://localhost:44374",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
