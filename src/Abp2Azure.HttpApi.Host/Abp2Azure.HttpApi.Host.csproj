@@ -30,11 +30,19 @@
     <ProjectReference Include="..\Abp2Azure.HttpApi\Abp2Azure.HttpApi.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
+<ItemGroup>
     <Compile Remove="Logs\**" />
     <Content Remove="Logs\**" />
     <EmbeddedResource Remove="Logs\**" />
     <None Remove="Logs\**" />
+
+    <Content Include="encryption-certificate.pfx">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="signing-certificate.pfx">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+
   </ItemGroup>
 
 </Project>
