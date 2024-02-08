@@ -188,7 +188,9 @@ ClientBin/
 *~
 *.dbmdl
 *.dbproj.schemaview
-*.pfx
+#*.pfx
+encryption-certificate.pfx
+signing-certificate.pfx
 *.publishsettings
 node_modules/
 orleans.codegen.cs
