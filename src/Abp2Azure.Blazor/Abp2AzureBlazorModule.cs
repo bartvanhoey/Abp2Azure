@@ -47,10 +47,21 @@ public class Abp2AzureBlazorModule : AbpModule
 
     private void ConfigureRouter(ServiceConfigurationContext context)
     {
-        Configure<AbpRouterOptions>(options =>
+
+
+        try
         {
-            options.AppAssembly = typeof(Abp2AzureBlazorModule).Assembly;
-        });
+            Configure<AbpRouterOptions>(options =>
+            {
+                options.AppAssembly = typeof(Abp2AzureBlazorModule).Assembly;
+            });
+
+        }
+        catch (System.Exception exception)
+        {
+            Console.WriteLine(exception.Message);
+            throw;
+        }
     }
 
     private void ConfigureMenu(ServiceConfigurationContext context)
@@ -70,7 +81,9 @@ public class Abp2AzureBlazorModule : AbpModule
 
     private static void ConfigureAuthentication(WebAssemblyHostBuilder builder)
     {
-        builder.Services.AddOidcAuthentication(options =>
+        try
+        {
+            builder.Services.AddOidcAuthentication(options =>
         {
             builder.Configuration.Bind("AuthServer", options.ProviderOptions);
             options.UserOptions.NameClaim = OpenIddictConstants.Claims.Name;
@@ -81,6 +94,12 @@ public class Abp2AzureBlazorModule : AbpModule
             options.ProviderOptions.DefaultScopes.Add("email");
             options.ProviderOptions.DefaultScopes.Add("phone");
         });
+        }
+        catch (System.Exception exception)
+        {
+            
+            Console.WriteLine(exception);
+        }
     }
 
     private static void ConfigureUI(WebAssemblyHostBuilder builder)
