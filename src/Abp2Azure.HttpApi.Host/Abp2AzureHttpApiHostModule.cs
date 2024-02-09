@@ -33,6 +33,7 @@ using Microsoft.AspNetCore.Hosting;
 using Volo.Abp.OpenIddict;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
+using Volo.Abp.AspNetCore.ExceptionHandling;
 
 namespace Abp2Azure;
 
@@ -164,6 +165,11 @@ public class Abp2AzureHttpApiHostModule : AbpModule
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
         ConfigureSwaggerServices(context, configuration);
+
+        context.Services.Configure<AbpExceptionHandlingOptions>(options =>
+{
+    options.SendExceptionsDetailsToClients = true;
+});
     }
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
