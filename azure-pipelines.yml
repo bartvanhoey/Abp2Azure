@@ -23,6 +23,10 @@ steps:
 
 - task: CmdLine@2
   inputs:
+    script: dotnet tool install -g Volo.Abp.Cli
+
+- task: CmdLine@2
+  inputs:
     script: abp install-libs
 
 - task: VSBuild@1
