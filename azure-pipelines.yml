@@ -21,6 +21,10 @@ steps:
   inputs:
     restoreSolution: '$(solution)'
 
+- task: CmdLine@2
+  inputs:
+    script: abp install-libs
+
 - task: VSBuild@1
   inputs:
     solution: '$(solution)'
