@@ -37,12 +37,6 @@
     <EmbeddedResource Remove="Logs\**" />
     <None Remove="Logs\**" />
 
-   <!-- <Content Include="encryption-certificate.pfx">
-       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-   <Content Include="signing-certificate.pfx">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-   </Content> -->
 
    <Content Include="openiddict.pfx">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
